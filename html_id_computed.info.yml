@@ -1,0 +1,7 @@
+name: Computed HTML ID
+type: module
+description: Generate HTML ID for entities
+core: 8.x
+package: Ceres
+dependencies:
+  - paragraphs:paragraphs

@@ -1,0 +1,61 @@
+<?php
+
+use Drupal\Core\Entity\EntityTypeInterface;
+
+/**
+ * @file Paragraphs HTML ID computed field functions and hooks implementations.
+ */
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function html_id_computed_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+  if ('paragraph' !== $entity_type->id()) {
+    return $fields;
+  }
+  $fields['html_id'] = _html_id_computed_add_field_info();
+  return $fields;
+}
+
+function html_id_computed_entity_bundle_field_info(
+  EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+  if ('node' === $entity_type->id()) {
+    if ('chapter' == $bundle || 'roadmap_key_expec' == $bundle) {
+      $fields['html_id'] = _html_id_computed_add_field_info();
+    }
+  }
+  return $fields;
+}
+
+function _html_id_computed_add_field_info() {
+  return  \Drupal\Core\Field\BaseFieldDefinition::create('html_id_computed')
+    ->setName('html_id')
+    ->setLabel(t('HTML ID'))
+    ->setComputed(true)
+    ->setClass('\Drupal\html_id_computed\HtmlIdItemList')
+    ->setDisplayConfigurable('view', false)
+    ->setDisplayConfigurable('form', false);
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function html_id_computed_field_formatter_info_alter(array &$info) {
+  $info['string']['field_types'][] = 'html_id_computed';
+}
+
+function html_id_computed_preprocess_paragraph(&$variables) {
+  /* @var $paragraph \Drupal\paragraphs\Entity\Paragraph */
+  $paragraph = $variables['paragraph'];
+  $variables['attributes']['id'] = $paragraph->get('html_id')->first()->value;
+}
+
+function html_id_computed_preprocess_node(&$variables) {
+  /* @var $node \Drupal\node\Entity\Node */
+  $node = $variables['node'];
+  if ('chapter' == $node->getType() || 'roadmap_key_expec' == $node->getType()) {
+    $variables['attributes']['id'] = $node->get('html_id')->first()->value;
+  }
+}
